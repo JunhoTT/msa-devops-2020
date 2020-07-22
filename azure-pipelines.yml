@@ -7,13 +7,36 @@ trigger:
 - master
 
 pool:
-  vmImage: 'ubuntu-latest'
+  vmImage: 'ubuntu-latest'  # the OS of the agent running the pipeline. Both 'macOS-latest' and 'windows-latest' are also available
+
+
+# steps:
+# - script: echo Hello, world!
+#   displayName: 'Run a one-line script' # name shown when the task runs
+
+# - script: |
+#     echo Add other tasks to build, test, and deploy your project.
+#     echo See https://aka.ms/yaml
+#   displayName: 'Run a multi-line script'
+
+variables:
+  rootDir: 'my-app'
+  buildDir: '$(rootDir)/build'
 
 steps:
-- script: echo Hello, world!
-  displayName: 'Run a one-line script'
+- task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+    ArtifactName: 'drop'
+    publishLocation: 'Container'
+- task: NodeTool@0
+  inputs:
+    versionSpec: '10.x'
+  displayName: 'Install Node.js'
 
 - script: |
-    echo Add other tasks to build, test, and deploy your project.
-    echo See https://aka.ms/yaml
-  displayName: 'Run a multi-line script'
+    cd $(rootDir)
+    npm install
+    npm run build
+    cd ..
+  displayName: 'npm install and build'
